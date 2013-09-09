@@ -110,7 +110,7 @@ static void dyn_fsync_early_suspend(struct early_suspend *h)
 		early_suspend_active = true;
 #if 1
 		/* flush all outstanding buffers */
-		wakeup_flusher_threads(0);
+		wakeup_flusher_threads(0,WB_REASON_FS_FREE_SPACE);
 		sync_filesystems(0);
 		sync_filesystems(1);
 #endif
