@@ -1200,7 +1200,7 @@ int __sock_create(struct net *net, int family, int type, int protocol,
 			 struct socket **res, int kern)
 {
 	int err;
-	struct socket *sock;
+	struct socket *sock = NULL;
 	const struct net_proto_family *pf;
 
 	/*
