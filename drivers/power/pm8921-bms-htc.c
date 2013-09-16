@@ -2645,7 +2645,7 @@ static int pm8921_bms_suspend(struct device *dev)
 #define DELTA_RBATT_PERCENT	10
 static int pm8921_bms_resume(struct device *dev)
 {
-	u64 val;
+	u64 val = 0;
 	struct pm8921_rbatt_params raw;
 	struct pm8921_bms_chip *chip = dev_get_drvdata(dev);
 	int rbatt;
