@@ -1195,7 +1195,7 @@ static unsigned char *get_udp_data(struct sk_buff *skb, unsigned int protoff,
 {
 	const struct udphdr *uh;
 	struct udphdr _uh;
-	int dataoff 0;
+	int dataoff = 0;
 
 	uh = skb_header_pointer(skb, protoff, sizeof(_uh), &_uh);
 	if (uh == NULL)
