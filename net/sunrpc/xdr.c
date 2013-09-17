@@ -258,7 +258,7 @@ _shift_data_right_pages(struct page **pages, size_t pgto_base,
 static void
 _copy_to_pages(struct page **pages, size_t pgbase, const char *p, size_t len)
 {
-	struct page **pgto = NULL;
+	struct page **pgto;
 	char *vto;
 	size_t copy;
 
@@ -492,7 +492,7 @@ void xdr_init_encode(struct xdr_stream *xdr, struct xdr_buf *buf, __be32 *p)
 		iov->iov_len += len;
 	}
 }
-EXPORT_SYMBOL_GPL(xdr_init_encode);subbuf.page_base
+EXPORT_SYMBOL_GPL(xdr_init_encode);
 
 /**
  * xdr_reserve_space - Reserve buffer space for sending
