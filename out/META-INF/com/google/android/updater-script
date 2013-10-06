@@ -1,0 +1,79 @@
+set_progress(0.0);
+ui_print(" ");
+ui_print("Torched Kernel");
+ifelse(is_mounted("/system") == "/system", unmount("/system"));
+ifelse(is_mounted("/cache") == "/cache", unmount("/cache"));
+ui_print("..");
+set_progress(0.1);
+
+
+ui_print("Extracting files.....");
+package_extract_dir("kernel", "/tmp");
+set_perm(0, 0, 0777, "/tmp/compatibility.sh");
+set_perm(0, 0, 0777, "/tmp/mkbootimg.sh");
+set_perm(0, 0, 0777, "/tmp/mkbootimg");
+set_perm(0, 0, 0777, "/tmp/unpackbootimg");
+set_perm(0, 0, 0777, "/tmp/modclean.sh");
+set_progress(0.1);
+
+
+ui_print("Mount system...");
+run_program("/sbin/busybox", "mount", "/system");
+set_progress(0.2);
+
+
+ui_print("Clean up old modules...");
+run_program("/tmp/modclean.sh");
+set_progress(0.3);
+
+
+ui_print("Copy new modules...");
+package_extract_dir("system", "/system");
+#package_extract_dir("prebuilt", "/system");
+
+
+#FOR INIT.D IF I EVER GET THERE
+#ui_print("Copy init.d scripts...");
+#package_extract_dir("system", "/system");
+#set_perm_recursive(0, 2000, 0777, 0777, "/system/etc/init.d");
+
+
+ui_print("Extract old kernel...");
+run_program("/sbin/busybox", "dd", "if=/dev/block/mmcblk0p21", "of=/tmp/boot.img");
+set_progress(0.5);
+
+ui_print("Extract ramdisk...");
+run_program("/tmp/unpackbootimg", "-i", "/tmp/boot.img", "-o", "/tmp/");
+set_progress(0.65);
+
+#Configuration
+ui_print("Check compatability...");
+run_program("/tmp/compatibility.sh");
+set_progress(0.75);
+
+ui_print("Unmounting system...");
+unmount("/system");
+set_progress(0.8);
+
+
+ui_print("Making new boot.img...");
+run_program("/tmp/mkbootimg.sh");
+set_progress(0.9);
+
+
+ui_print("Flashing new boot.img...");
+run_program("/sbin/busybox", "dd", "if=/tmp/newboot.img", "of=/dev/block/mmcblk0p21");
+set_progress(0.95);
+
+ui_print("");
+set_progress(0.9);
+
+ui_print("");
+ui_print("Gotta wipe when your done right?...");
+ui_print("Wiping /cache");
+unmount("/cache");
+format("ext4", "EMMC", "/dev/block/mmcblk0p34");
+
+ui_print("Cleaning dalvik-cache");
+run_program("/sbin/busybox", "mount", "/data");
+delete_recursive("/data/dalvik-cache");
