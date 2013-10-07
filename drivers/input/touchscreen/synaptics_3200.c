@@ -138,6 +138,15 @@ static int synaptics_init_panel(struct synaptics_ts_data *ts);
 static irqreturn_t synaptics_irq_thread(int irq, void *ptr);
 
 extern unsigned int get_tamper_sf(void);
+bool scr_suspended = false;
+
+extern uint8_t touchscreen_is_on(void)
+{
+	if (scr_suspended == false) {
+	return 1;
+	}
+	return 0;
+}
 
 static void syn_page_select(struct i2c_client *client, uint8_t page)
 {
@@ -2770,6 +2779,7 @@ static int synaptics_ts_suspend(struct i2c_client *client, pm_message_t mesg)
 {
 	int ret;
 	struct synaptics_ts_data *ts = i2c_get_clientdata(client);
+	scr_suspended = true; 
 	printk(KERN_INFO "[TP] %s: enter\n", __func__);
 
 	if (ts->use_irq) {
@@ -2870,6 +2880,7 @@ static int synaptics_ts_resume(struct i2c_client *client)
 {
 	int ret;
 	struct synaptics_ts_data *ts = i2c_get_clientdata(client);
+	scr_suspended = true; 
 	printk(KERN_INFO "[TP] %s: enter\n", __func__);
 
 	if (ts->power) {
