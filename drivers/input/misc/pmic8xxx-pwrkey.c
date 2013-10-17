@@ -43,7 +43,7 @@ struct pmic8xxx_pwrkey {
 static irqreturn_t pwrkey_press_irq(int irq, void *_pwrkey)
 {
 	struct pmic8xxx_pwrkey *pwrkey = _pwrkey;
-
+	printk(KERN_INFO "[PWR_KEY_press IRQ] \n");
 	if (pwrkey->press == true) {
 		pwrkey->press = false;
 		return IRQ_HANDLED;
@@ -60,7 +60,7 @@ static irqreturn_t pwrkey_press_irq(int irq, void *_pwrkey)
 static irqreturn_t pwrkey_release_irq(int irq, void *_pwrkey)
 {
 	struct pmic8xxx_pwrkey *pwrkey = _pwrkey;
-
+	printk(KERN_INFO "[PWR_KEY_release IRQ] \n");
 	if (pwrkey->press == false) {
 		input_report_key(pwrkey->pwr, KEY_POWER, 1);
 		input_sync(pwrkey->pwr);
@@ -79,7 +79,7 @@ static irqreturn_t pwrkey_release_irq(int irq, void *_pwrkey)
 static int pmic8xxx_pwrkey_suspend(struct device *dev)
 {
 	struct pmic8xxx_pwrkey *pwrkey = dev_get_drvdata(dev);
-
+	printk(KERN_INFO "[PWR_KEY_resume] \n");
 	if (device_may_wakeup(dev)) {
 		enable_irq_wake(pwrkey->key_press_irq);
 		enable_irq_wake(pwrkey->key_release_irq);
@@ -91,7 +91,7 @@ static int pmic8xxx_pwrkey_suspend(struct device *dev)
 static int pmic8xxx_pwrkey_resume(struct device *dev)
 {
 	struct pmic8xxx_pwrkey *pwrkey = dev_get_drvdata(dev);
-
+	printk(KERN_INFO "[PWR_KEY_resume] \n");
 	if (device_may_wakeup(dev)) {
 		disable_irq_wake(pwrkey->key_press_irq);
 		disable_irq_wake(pwrkey->key_release_irq);
@@ -115,19 +115,23 @@ static int __devinit pmic8xxx_pwrkey_probe(struct platform_device *pdev)
 	struct pmic8xxx_pwrkey *pwrkey;
 	const struct pm8xxx_pwrkey_platform_data *pdata =
 					dev_get_platdata(&pdev->dev);
-
+	printk(KERN_INFO "[PWR_KEY_PROBE] IN FUNC\n");
 	if (!pdata) {
 		dev_err(&pdev->dev, "power key platform data not supplied\n");
 		return -EINVAL;
 	}
-
+	printk(KERN_INFO "[PWR_KEY_PROBE] CHECKING DELAY\n");
 	/* Valid range of pwr key trigger delay is 1/64 sec to 2 seconds. */
 	if (pdata->kpd_trigger_delay_us > USEC_PER_SEC * 2 ||
 		pdata->kpd_trigger_delay_us < USEC_PER_SEC / 64) {
+		printk(KERN_INFO "[PWR_KEY_PROBE] invalid power key trigger delay\n");
+		if(pdata->kpd_trigger_delay_us < USEC_PER_SEC / 64){
+			printk(KERN_INFO "[PWR_KEY_PROBE] delay to short\n");
+			}
 		dev_err(&pdev->dev, "invalid power key trigger delay\n");
 		return -EINVAL;
 	}
-
+	printk(KERN_INFO "[PWR_KEY_PROBE] DELAY PAST\n");
 	pwrkey = kzalloc(sizeof(*pwrkey), GFP_KERNEL);
 	if (!pwrkey)
 		return -ENOMEM;
@@ -212,7 +216,7 @@ static int __devinit pmic8xxx_pwrkey_probe(struct platform_device *pdev)
 	}
 
 	device_init_wakeup(&pdev->dev, pdata->wakeup);
-
+	printk(KERN_INFO "[PWR_KEY_PROBE] LEAVING FUNC\n");
 	return 0;
 
 free_press_irq:

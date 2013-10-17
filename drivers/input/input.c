@@ -221,6 +221,7 @@ static void input_handle_event(struct input_dev *dev,
 	switch (type) {
 
 	case EV_SYN:
+		printk(KERN_INFO "[EV_SYN] in case\n");
 		switch (code) {
 		case SYN_CONFIG:
 			disposition = INPUT_PASS_TO_ALL;
@@ -240,8 +241,10 @@ static void input_handle_event(struct input_dev *dev,
 		break;
 
 	case EV_KEY:
+		printk(KERN_INFO "[EV_KEY] in case\n");
 		if (is_event_supported(code, dev->keybit, KEY_MAX) &&
 		    !!test_bit(code, dev->key) != value) {
+			printk(KERN_INFO "[EV_SYN] in if #1\n");
 
 			if (value != 2) {
 				__change_bit(code, dev->key);
@@ -317,14 +320,20 @@ static void input_handle_event(struct input_dev *dev,
 		break;
 	}
 
-	if (disposition != INPUT_IGNORE_EVENT && type != EV_SYN)
+	if (disposition != INPUT_IGNORE_EVENT && type != EV_SYN){
+		printk(KERN_INFO "[in_ev] ignoring event\n");
 		dev->sync = false;
+		}
 
-	if ((disposition & INPUT_PASS_TO_DEVICE) && dev->event)
+	if ((disposition & INPUT_PASS_TO_DEVICE) && dev->event){
+		printk(KERN_INFO "[in_ev] passing key to device\n");		
 		dev->event(dev, type, code, value);
+		}
 
-	if (disposition & INPUT_PASS_TO_HANDLERS)
+	if (disposition & INPUT_PASS_TO_HANDLERS){
+		printk(KERN_INFO "[in_ev] passing key to handler\n");
 		input_pass_event(dev, type, code, value);
+		}
 }
 
 /**

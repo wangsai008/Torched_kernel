@@ -144,7 +144,7 @@ extern unsigned int get_tamper_sf(void);
 
 int s2w_switch = 1;
 int dt2w_switch = 0;
-int pocket_detect = 1;
+int pocket_detect = 0;
 int s2w_wakestat = 0;
 cputime64_t dt2w_time[2] = {0, 0}; 
 #define DT2W_TIMEOUT_MAX 275 
@@ -174,16 +174,21 @@ static void sweep2wake_presspwr(struct work_struct * sweep2wake_presspwr_work) {
 	if (scr_suspended == true && pocket_detect == 1)
 		pocket_mode = power_key_check_in_pocket();
 
+	printk(KERN_INFO "[PWR_KEY] pocket mode=%d , pocket detect=%d,scr_sus=%d \n",
+			pocket_mode, pocket_detect, scr_suspended);	
 	if (!pocket_mode || pocket_detect == 0) {
-
+		printk(KERN_INFO "[PWR_KEY] in power cycle\n");
 	   	if (!mutex_trylock(&pwrkeyworklock))
 			return;
+		printk(KERN_INFO "[PWR_KEY] cycling power button\n");
+		printk(KERN_INFO "[PWR_KEY] EV_key=%d ,key_power=%d ,ev_syn=%d \n",
+			EV_KEY, KEY_POWER, EV_SYN);
 		input_event(sweep2wake_pwrdev, EV_KEY, KEY_POWER, 1);
-		input_event(sweep2wake_pwrdev, EV_SYN, 0, 0);
-		msleep(80);
+		input_sync(sweep2wake_pwrdev);
+		msleep(100);
 		input_event(sweep2wake_pwrdev, EV_KEY, KEY_POWER, 0);
-		input_event(sweep2wake_pwrdev, EV_SYN, 0, 0);
-		msleep(80);
+		input_sync(sweep2wake_pwrdev);
+		msleep(100);
 		mutex_unlock(&pwrkeyworklock);
 		return;
 	}
@@ -1964,9 +1969,9 @@ static void synaptics_ts_finger_func(struct synaptics_ts_data *ts)
 
 #ifdef CONFIG_TOUCHSCREEN_SYNAPTICS_SWEEP2WAKE
 
-// 				      printk(KERN_INFO "[sweep2wake]: %d=> X:%d, Y:%d w:%d, z:%d\n",
-//								i + 1, finger_data[i][0], finger_data[i][1],
-// 								finger_data[i][2], finger_data[i][3]);
+ 				      printk(KERN_INFO "[sweep2wake]: %d=> X:%d, Y:%d w:%d, z:%d\n",
+								i + 1, finger_data[i][0], finger_data[i][1],
+ 								finger_data[i][2], finger_data[i][3]);
 
 							//left->right
 							if ((ts->finger_count == 1) && (scr_suspended == true) && (s2w_switch == 1)) {
@@ -3224,7 +3229,7 @@ static int synaptics_ts_resume(struct i2c_client *client)
 		}
 	}
 
-	if (ts->use_irq) {
+	if (ts->use_irq && ts->irq_enabled != 1) {
 		enable_irq(client->irq);
 		ts->irq_enabled = 1;
 	}
