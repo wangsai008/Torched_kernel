@@ -1191,7 +1191,9 @@ endif # CONFIG_MODULES
 CLEAN_DIRS  += $(MODVERDIR)
 CLEAN_FILES +=	vmlinux System.map \
                 .tmp_kallsyms* .tmp_version .tmp_vmlinux* .tmp_System.map
-
+CLEAN_DIRS  += out/system/*
+CLEAN_FILES += out/kernel/z*
+CLEAN_FILES += out/Torched*
 # Directories & files removed with 'make mrproper'
 MRPROPER_DIRS  += include/config usr/include include/generated          \
                   arch/*/include/generated
