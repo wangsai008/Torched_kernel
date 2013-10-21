@@ -865,10 +865,11 @@ static int __cpuinit per_cpu_init(int cpu)
 	struct scalable *sc = &drv.scalable[cpu];
 	const struct acpu_level *acpu_level;
 	int ret;
-
+	printk(KERN_INFO "[PCINIT]: begin\n");
 	sc->hfpll_base = ioremap(sc->hfpll_phys_base, SZ_32);
 	if (!sc->hfpll_base) {
 		ret = -ENOMEM;
+		printk(KERN_INFO "[PCINIT]: e-ioremap\n");
 		goto err_ioremap;
 	}
 
@@ -877,6 +878,7 @@ static int __cpuinit per_cpu_init(int cpu)
 		acpu_level = find_min_acpu_level();
 		if (!acpu_level) {
 			ret = -ENODEV;
+			printk(KERN_INFO "[PCINIT]: e-tabl\n");
 			goto err_table;
 		}
 		dev_dbg(drv.dev, "CPU%d is running at an unknown rate. Defaulting to %lu KHz.\n",
@@ -887,12 +889,14 @@ static int __cpuinit per_cpu_init(int cpu)
 	}
 
 	ret = regulator_init(sc, acpu_level);
-	if (ret)
-		goto err_regulators;
+	if (ret){
+		printk(KERN_INFO "[PCINIT]: e-reg\n");
+		goto err_regulators; }
 
 	ret = init_clock_sources(sc, &acpu_level->speed);
-	if (ret)
-		goto err_clocks;
+	if (ret){
+		printk(KERN_INFO "[PCINIT]: e-clocks\n");
+		goto err_clocks; }
 
 	sc->l2_vote = acpu_level->l2_level;
 	sc->initialized = true;
@@ -900,6 +904,7 @@ static int __cpuinit per_cpu_init(int cpu)
 	return 0;
 
 err_clocks:
+
 	regulator_cleanup(sc);
 err_regulators:
 err_table:
@@ -928,7 +933,7 @@ static void __init bus_init(const struct l2_level *l2_level)
 #ifdef CONFIG_CPU_VOLTAGE_TABLE
 
 #define HFPLL_MIN_VDD     800000
-#define HFPLL_MAX_VDD    1350000
+#define HFPLL_MAX_VDD    1450000
 
 ssize_t acpuclk_get_vdd_levels_str(char *buf) {
 
@@ -963,7 +968,7 @@ void acpuclk_set_vdd(unsigned int khz, int vdd_uv) {
     else if (drv.acpu_freq_tbl[i].speed.khz == khz)
       new_vdd_uv = min(max((unsigned int)vdd_uv,
         (unsigned int)HFPLL_MIN_VDD), (unsigned int)HFPLL_MAX_VDD);
-    else 
+    else
       continue;
 
     drv.acpu_freq_tbl[i].vdd_core = new_vdd_uv;
@@ -979,13 +984,16 @@ static struct cpufreq_frequency_table freq_table[NR_CPUS][35];
 static void __init cpufreq_table_init(void)
 {
 	int cpu;
-
+	printk(KERN_INFO "[cpufreqinit]: begining table build");
 	for_each_possible_cpu(cpu) {
+//	printk(KERN_INFO "[cpufreqinit]: cpufreq  CPU%d \n", cpu); 
 		int i, freq_cnt = 0;
 		/* Construct the freq_table tables from acpu_freq_tbl. */
 		for (i = 0; drv.acpu_freq_tbl[i].speed.khz != 0
 				&& freq_cnt < ARRAY_SIZE(*freq_table); i++) {
+		printk(KERN_INFO "[cpufreqtblinit]: reading table CPU=%d, speed=%lu, 				freqcnt=%d \n", cpu, drv.acpu_freq_tbl[i].speed.khz, freq_cnt);
 			if (drv.acpu_freq_tbl[i].use_for_scaling) {
+		printk(KERN_INFO "[cpufreqtblinit]: adding to table CPU=%d, speed=%lu, 				index=%d \n", cpu, drv.acpu_freq_tbl[i].speed.khz, freq_cnt);
 				freq_table[cpu][freq_cnt].index = freq_cnt;
 				freq_table[cpu][freq_cnt].frequency
 					= drv.acpu_freq_tbl[i].speed.khz;
@@ -994,7 +1002,7 @@ static void __init cpufreq_table_init(void)
 		}
 		/* freq_table not big enough to store all usable freqs. */
 		BUG_ON(drv.acpu_freq_tbl[i].speed.khz != 0);
-
+	printk(KERN_INFO "[cpufreqtblinit]: through table create\n");
 		freq_table[cpu][freq_cnt].index = freq_cnt;
 		freq_table[cpu][freq_cnt].frequency = CPUFREQ_TABLE_END;
 
@@ -1065,13 +1073,13 @@ static struct notifier_block __cpuinitdata acpuclk_cpu_notifier = {
 static const int krait_needs_vmin(void)
 {
 	switch (read_cpuid_id()) {
-#ifdef CONFIG_CPU_VOLTAGE_TABLE
-	return 0;  // ignore errata cases and force following VDD tables
-#endif
- 	case 0x511F04D0: /* KR28M2A20 */
+//#ifdef CONFIG_CPU_VOLTAGE_TABLE
+//	return 0;  // ignore errata cases and force following VDD tables
+//#endif
+	case 0x511F04D0: /* KR28M2A20 */
 	case 0x511F04D1: /* KR28M2A21 */
 	case 0x510F06F0: /* KR28M4A10 */
-		return 1;
+//		return 1;
 	default:
 		return 0;
 	};
@@ -1079,6 +1087,7 @@ static const int krait_needs_vmin(void)
 
 static void krait_apply_vmin(struct acpu_level *tbl)
 {
+printk(KERN_INFO "[vmin]Applying vmin voltage\n" );
 	for (; tbl->speed.khz != 0; tbl++) {
 		if (tbl->vdd_core < 1150000)
 			tbl->vdd_core = 1150000;
@@ -1224,13 +1233,18 @@ static void __init hw_init(void)
 int __init acpuclk_krait_init(struct device *dev,
 			      const struct acpuclk_krait_params *params)
 {
+	printk(KERN_INFO "[acpuinit]: begining init"); 
 	drv_data_init(dev, params);
+	printk(KERN_INFO "[acpuinit]: after drv-data-init"); 
 	hw_init();
-
+	printk(KERN_INFO "[acpuinit]: after hw init"); 
 	cpufreq_table_init();
+	printk(KERN_INFO "[acpuinit]: cpufreq table  init"); 
 	dcvs_freq_init();
+	printk(KERN_INFO "[acpuinit]: dcvs_freqlimit init"); 
 	acpuclk_register(&acpuclk_krait_data);
+	printk(KERN_INFO "[acpuinit]: acpureg init"); 
 	register_hotcpu_notifier(&acpuclk_cpu_notifier);
-
+	printk(KERN_INFO "[acpuinit]: reghotcpu init"); 
 	return 0;
 }
