@@ -928,7 +928,7 @@ static void __init bus_init(const struct l2_level *l2_level)
 #ifdef CONFIG_CPU_VOLTAGE_TABLE
 
 #define HFPLL_MIN_VDD     800000
-#define HFPLL_MAX_VDD    1350000
+#define HFPLL_MAX_VDD    1450000
 
 ssize_t acpuclk_get_vdd_levels_str(char *buf) {
 
@@ -963,7 +963,7 @@ void acpuclk_set_vdd(unsigned int khz, int vdd_uv) {
     else if (drv.acpu_freq_tbl[i].speed.khz == khz)
       new_vdd_uv = min(max((unsigned int)vdd_uv,
         (unsigned int)HFPLL_MIN_VDD), (unsigned int)HFPLL_MAX_VDD);
-    else 
+    else
       continue;
 
     drv.acpu_freq_tbl[i].vdd_core = new_vdd_uv;
@@ -1065,13 +1065,10 @@ static struct notifier_block __cpuinitdata acpuclk_cpu_notifier = {
 static const int krait_needs_vmin(void)
 {
 	switch (read_cpuid_id()) {
-#ifdef CONFIG_CPU_VOLTAGE_TABLE
-	return 0;  // ignore errata cases and force following VDD tables
-#endif
- 	case 0x511F04D0: /* KR28M2A20 */
+	case 0x511F04D0: /* KR28M2A20 */
 	case 0x511F04D1: /* KR28M2A21 */
 	case 0x510F06F0: /* KR28M4A10 */
-		return 1;
+//		return 1;
 	default:
 		return 0;
 	};
@@ -1079,6 +1076,7 @@ static const int krait_needs_vmin(void)
 
 static void krait_apply_vmin(struct acpu_level *tbl)
 {
+printk(KERN_INFO "[vmin]Applying vmin voltage\n" );
 	for (; tbl->speed.khz != 0; tbl++) {
 		if (tbl->vdd_core < 1150000)
 			tbl->vdd_core = 1150000;
