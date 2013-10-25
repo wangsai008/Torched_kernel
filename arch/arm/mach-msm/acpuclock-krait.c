@@ -1064,11 +1064,14 @@ static struct notifier_block __cpuinitdata acpuclk_cpu_notifier = {
 
 static const int krait_needs_vmin(void)
 {
+#ifdef CONFIG_CPU_VOLTAGE_TABLE
+	return 0;
+#endif
 	switch (read_cpuid_id()) {
 	case 0x511F04D0: /* KR28M2A20 */
 	case 0x511F04D1: /* KR28M2A21 */
 	case 0x510F06F0: /* KR28M4A10 */
-//		return 1;
+		return 1;
 	default:
 		return 0;
 	};
