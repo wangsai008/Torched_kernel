@@ -178,11 +178,11 @@ static void sweep2wake_presspwr(struct work_struct * sweep2wake_presspwr_work) {
 
 	   	if (!mutex_trylock(&pwrkeyworklock))
 			return;
-		input_event(sweep2wake_pwrdev, EV_KEY, KEY_POWER, 1);
-		input_event(sweep2wake_pwrdev, EV_SYN, 0, 0);
+		input_report_key(sweep2wake_pwrdev, KEY_POWER, 1);
+		input_sync(sweep2wake_pwrdev); 
 		msleep(80);
-		input_event(sweep2wake_pwrdev, EV_KEY, KEY_POWER, 0);
-		input_event(sweep2wake_pwrdev, EV_SYN, 0, 0);
+		input_report_key(sweep2wake_pwrdev, KEY_POWER, 0);
+		input_sync(sweep2wake_pwrdev); 
 		msleep(80);
 		mutex_unlock(&pwrkeyworklock);
 		return;
