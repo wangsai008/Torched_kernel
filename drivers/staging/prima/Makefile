@@ -1,5 +1,7 @@
 MODNAME := prima_wlan
-EXTRA_CFLAGS += -Os
+ifdef CONFIG_CC_OPTIMIZE_ALOT
+CFLAGS_btcApi.o += -Wno-array-bounds
+endif
 
 #Do we panic on bug?  default is to warn
 PANIC_ON_BUG := 0
