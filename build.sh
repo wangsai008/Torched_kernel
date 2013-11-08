@@ -4,11 +4,11 @@
 CROSS_COMPILE=/home/jason/prebuilt/linux-x86/arm/arm-eabi-inline/bin/arm-eabi-
 RAMDISK=ramdisk.img
 KERNEL_NAME=Torched
-KERNEL_VNUMBER=B4
+KERNEL_VNUMBER=B5
 CONFIG_FILE=Torched_defconfig
 MOD_DIR=${CURRENT_DIR}/out/system/lib/modules
-export LOCALVERSION="-Torched.B4"
-export KBUILD_BUILD_VERSION="4"
+export LOCALVERSION="-Torched.B5"
+export KBUILD_BUILD_VERSION="5"
 
 # DO NOT MODIFY BELOW THIS LINE
 CURRENT_DIR=`pwd`
@@ -49,7 +49,7 @@ echo "***********************************************************************"
 echo "*                              Making zip                             *"
 echo "***********************************************************************"
 
-if [[ ! -e $MOD_DIR ]]; then
+if [[ ! -d $MOD_DIR ]]; then
     mkdir -p $MOD_DIR
 elif [[ ! -d $MOD_DIR ]]; then
     echo "$MOD_DIR already exists but is not a directory" 1>&2
