@@ -52,7 +52,7 @@
  * lowering the frequency towards the ideal frequency is faster than below it.
  */
 
-#define GOV_IDLE_FREQ 486000
+#define GOV_IDLE_FREQ 384000
 
 #define DEFAULT_SUSPEND_IDEAL_FREQ GOV_IDLE_FREQ
 static unsigned int suspend_ideal_freq;
@@ -126,7 +126,7 @@ static unsigned int boost_freq = 810000;
 static bool boost = true;
 
 /* in nsecs */
-static unsigned int boost_duration = 5000000;
+static unsigned int boost_duration = 500000;
 
 /* Consider IO as busy */
 #define DEFAULT_IO_IS_BUSY 1
