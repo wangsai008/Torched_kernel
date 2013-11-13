@@ -1659,6 +1659,12 @@ config CPU_VOLTAGE_TABLE
 	help
 	  Krait User Votlage Control
 
+config BYPASS_VMIN
+	bool "Bypass Qcom's errata checks that enforce minimum CPU voltages"
+	default n
+	help
+	  Krait Vmin Bypass
+
 config CPU_OVERCLOCK
 	bool "Enable CPU Overclocking option"
 	default n
