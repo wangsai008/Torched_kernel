@@ -388,8 +388,7 @@ KBUILD_CFLAGS   := -Wall -Wundef -Wstrict-prototypes -Wno-trigraphs \
             -fno-delete-null-pointer-checks -mno-unaligned-access -mtune=cortex-a15 \
             -fpredictive-commoning -fgcse-after-reload -ftree-vectorize \
             -fipa-cp-clone -fsingle-precision-constant -pipe \
-            -funswitch-loops -Ofast 
-#	    -floop-interchange -ftree-loop-distribution -floop-strip-mine -floop-block
+            -funswitch-loops -Ofast
 
 KBUILD_AFLAGS_KERNEL :=
 KBUILD_CFLAGS_KERNEL :=
@@ -580,7 +579,6 @@ endif # $(dot-config)
 # Defaults to vmlinux, but the arch makefile usually adds further targets
 all: vmlinux
 
-#KBUILD_CFLAGS	+= -floop-interchange -ftree-loop-distribution -floop-strip-mine -floop-block
 ifdef CONFIG_CC_OPTIMIZE_FOR_SIZE
 KBUILD_CFLAGS	+= -Os
 endif
