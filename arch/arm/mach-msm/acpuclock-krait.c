@@ -1064,7 +1064,7 @@ static struct notifier_block __cpuinitdata acpuclk_cpu_notifier = {
 
 static const int krait_needs_vmin(void)
 {
-#ifdef CONFIG_CPU_VOLTAGE_TABLE
+#ifdef CONFIG_BYPASS_VMIN
 	return 0;
 #endif
 	switch (read_cpuid_id()) {
