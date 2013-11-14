@@ -1069,6 +1069,19 @@ adreno_ringbuffer_issueibcmds(struct kgsl_device_private *dev_priv,
 	} else
 		drawctxt->timestamp++;
 
+	flags &= KGSL_CMD_FLAGS_EOF;
+
+	/*
+	 * For some targets, we need to execute a dummy shader operation after a
+	 * power collapse
+	 */
+
+	if (test_and_clear_bit(ADRENO_DEVICE_PWRON, &adreno_dev->priv) &&
+	    test_bit(ADRENO_DEVICE_PWRON_FIXUP, &adreno_dev->priv))
+	{
+		flags |= KGSL_CMD_FLAGS_PWRON_FIXUP;
+	}
+
 	ret = adreno_ringbuffer_addcmds(&adreno_dev->ringbuffer,
 					drawctxt,
 					(flags & KGSL_CMD_FLAGS_EOF),
