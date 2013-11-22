@@ -77,10 +77,5 @@ set_progress(0.9);
 
 ui_print("");
 ui_print("Gotta wipe when your done right?...");
-ui_print("Wiping /cache");
-unmount("/cache");
-format("ext4", "EMMC", "/dev/block/mmcblk0p34");
-
-ui_print("Cleaning dalvik-cache");
-run_program("/sbin/busybox", "mount", "/data");
-delete_recursive("/data/dalvik-cache");
+ui_print("");
+ui_print("Please wipe cache/dalvik before rebootiing");
